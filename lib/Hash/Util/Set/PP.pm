@@ -44,10 +44,11 @@ sub keys_difference(\%\%) {
 
 sub keys_symmetric_difference(\%\%) {
   my ($x, $y) = @_;
-  return (
+  my %z; @z{
     (grep { not exists $y->{$_} } keys %$x),
     (grep { not exists $x->{$_} } keys %$y),
-  );
+  } = ();
+  return keys %z;
 }
 
 sub keys_disjoint(\%\%) {

@@ -18,14 +18,15 @@ BEGIN {
                        keys_proper_superset
                        keys_any
                        keys_all
-                       keys_none ];
+                       keys_none
+                       keys_partition ];
 
   our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
   my $use_pp = $ENV{HASH_UTIL_SET_PP};
   if (!$use_pp) {
     eval {
-      require Hash::Util::Set::XS;
+      require Hash::Util::Set::XS; Hash::Util::Set::XS->import('0.03');
     };
     $use_pp = !!$@;
   }

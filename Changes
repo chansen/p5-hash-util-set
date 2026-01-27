@@ -1,3 +1,8 @@
+0.04 2026-01-27
+- Ensure all Set operations return the element count in scalar context.
+- Added keys_partition(), which partitions keys into three disjoint sets: 
+  A \ B, A ∩ B, and B \ A.
+
 0.03 2026-01-26
  - any() and all() require List::Util ≥ 1.33.
 

@@ -21,7 +21,27 @@ BEGIN {
                        keys_none
                        keys_partition ];
 
-  our %EXPORT_TAGS = ( all => \@EXPORT_OK );
+  our %EXPORT_TAGS = (
+    all        => \@EXPORT_OK,
+    operations => [qw[ keys_union
+                       keys_intersection
+                       keys_difference
+                       keys_symmetric_difference
+                       keys_partition ]],
+    predicates => [qw[ keys_disjoint
+                       keys_equal
+                       keys_subset
+                       keys_proper_subset
+                       keys_superset
+                       keys_proper_superset ]],
+    membership => [qw[ keys_any
+                       keys_all
+                       keys_none ]],
+    alias      => [qw[ keys_or
+                       keys_and
+                       keys_sub
+                       keys_xor ]],
+  );
 
   my $use_pp = $ENV{HASH_UTIL_SET_PP};
   if (!$use_pp) {

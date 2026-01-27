@@ -37,7 +37,7 @@ BEGIN {
     membership => [qw[ keys_any
                        keys_all
                        keys_none ]],
-    alias      => [qw[ keys_or
+    aliases    => [qw[ keys_or
                        keys_and
                        keys_sub
                        keys_xor ]],

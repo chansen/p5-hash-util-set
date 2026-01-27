@@ -32,7 +32,7 @@ Hash::Util::Set - Set operations on hash keys
    $bool = keys_all  %x, 'a', 'b', 'c';       # all exist?
    $bool = keys_none %x, 'x', 'y', 'z';       # none exist?
    
-   # Combined Operations
+   # Combined operations
    @sets = keys_partition %x, %y;             # A \ B, A ∩ B, B \ A
 
 =head1 DESCRIPTION
@@ -43,8 +43,8 @@ intersection, difference), set predicates, and membership tests.
 
 All operations work only on keys; values are ignored.
 
-This module automatically uses the XS implementation if available, falling back
-to pure Perl otherwise. 
+This module automatically uses the XS implementation if available, 
+falling back to pure Perl otherwise. 
 
 =head1 FUNCTIONS
 
@@ -165,7 +165,7 @@ Nothing is exported by default. Import functions individually or use C<:all>:
 
 =head1 IMPLEMENTATION
 
-Automatically uses C<Hash::Util::Set::XS> if available, otherwise falls back to
+Automatically uses L<Hash::Util::Set::XS> if available, otherwise falls back to
 C<Hash::Util::Set::PP>.
 
 =head1 SEE ALSO

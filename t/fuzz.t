@@ -46,6 +46,11 @@ sub vec_keys {
   return grep { vec($v, $_, 1) } 0..MAX_KEY - 1;
 }
 
+sub vec_keys_count {
+  my ($v) = @_;
+  return scalar grep { vec($v, $_, 1) } 0..MAX_KEY - 1;
+}
+
 sub vec_any {
   my ($v, @k) = @_;
   return FALSE unless @k;
@@ -82,27 +87,59 @@ for (1..ROUNDS) {
   vec($vy, MAX_KEY - 1, 1) |= 0;
 
   {
-    my $got = [ sort { $a <=> $b } keys_union %x, %y ];
-    my $exp = [ vec_keys($vx | $vy) ];
-    is_deeply($got, $exp, 'union');
+    my $exp_vec = $vx | $vy;
+    {
+      my $got = [ sort { $a <=> $b } keys_union %x, %y ];
+      my $exp = [ vec_keys($exp_vec) ];
+      is_deeply($got, $exp, 'union - list context');
+    }
+    {
+      my $got = keys_union %x, %y;
+      my $exp = vec_keys_count($exp_vec);
+      is($got, $exp, 'union - scalar context');
+    }
   }
 
   {
-    my $got = [ sort { $a <=> $b } keys_intersection %x, %y ];
-    my $exp = [ vec_keys($vx & $vy) ];
-    is_deeply($got, $exp, 'intersection');
+    my $exp_vec = $vx & $vy;
+    {
+      my $got = [ sort { $a <=> $b } keys_intersection %x, %y ];
+      my $exp = [ vec_keys($exp_vec) ];
+      is_deeply($got, $exp, 'intersection - list context');
+    }
+    {
+      my $got = keys_intersection %x, %y;
+      my $exp = vec_keys_count($exp_vec);
+      is($got, $exp, 'intersection - scalar context');
+    }
   }
 
   {
-    my $got = [ sort { $a <=> $b } keys_difference %x, %y ];
-    my $exp = [ vec_keys($vx & ~$vy) ];
-    is_deeply($got, $exp, 'difference');
+    my $exp_vec = $vx & ~$vy;
+    {
+      my $got = [ sort { $a <=> $b } keys_difference %x, %y ];
+      my $exp = [ vec_keys($exp_vec) ];
+      is_deeply($got, $exp, 'difference - list context');
+    }
+    {
+      my $got = keys_difference %x, %y;
+      my $exp = vec_keys_count($exp_vec);
+      is($got, $exp, 'difference - scalar context');
+    }
   }
 
   {
-    my $got = [ sort { $a <=> $b } keys_symmetric_difference %x, %y ];
-    my $exp = [ vec_keys($vx ^ $vy) ];
-    is_deeply($got, $exp, 'symmetric difference');
+    my $exp_vec = $vx ^ $vy;
+    {
+      my $got = [ sort { $a <=> $b } keys_symmetric_difference %x, %y ];
+      my $exp = [ vec_keys($exp_vec) ];
+      is_deeply($got, $exp, 'symmetric difference - list context');
+    }
+    {
+      my $got = keys_symmetric_difference %x, %y;
+      my $exp = vec_keys_count($exp_vec);
+      is($got, $exp, 'symmetric difference - scalar context');
+    }
   }
 
   is(keys_disjoint(%x, %y), !($vx & $vy), 'disjoint');

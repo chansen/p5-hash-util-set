@@ -25,6 +25,9 @@ SYNOPSIS
        $bool = keys_any  %x, 'a', 'z';            # at least one exists?
        $bool = keys_all  %x, 'a', 'b', 'c';       # all exist?
        $bool = keys_none %x, 'x', 'y', 'z';       # none exist?
+   
+       # Combined Operations
+       @sets = keys_partition %x, %y;             # A \ B, A ∩ B, B \ A
 
 DESCRIPTION
     "Hash::Util::Set" provides set operations on hash keys. It treats the
@@ -110,6 +113,15 @@ FUNCTIONS
 
     True if none of the keys in LIST exist in %x. Returns true for empty
     LIST.
+
+  Combined Operations
+   keys_partition
+        my ($only_x, $both, $only_y) = keys_partition %x, %y;
+
+    Partitions keys into three disjoint sets: keys only in %x ("A \ B"),
+    keys in both hashes ("A ∩ B"), and keys only in %y ("B \ A").
+
+    Returns a list with three array references.
 
 ALIASES
     Shorter aliases:

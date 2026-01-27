@@ -18,7 +18,8 @@ our @EXPORT_OK = qw[ keys_union
                      keys_proper_superset
                      keys_any
                      keys_all
-                     keys_none ];
+                     keys_none
+                     keys_partition ];
 
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
@@ -95,6 +96,25 @@ sub keys_all(\%@) {
 sub keys_none(\%@) {
   my $x = shift;
   return not any { exists $x->{$_} } @_;
+}
+
+sub keys_partition(\%\%) {
+  my ($x, $y) = @_;
+
+  my (@only_x, @both, @only_y);
+  foreach my $k (keys %$x) {
+    if (exists $y->{$k}) {
+      push @both, $k;
+    } else {
+      push @only_x, $k;
+    }
+  }
+
+  foreach my $k (keys %$y) {
+    push @only_y, $k unless exists $x->{$k};
+  }
+
+  return (\@only_x, \@both, \@only_y);
 }
 
 BEGIN {

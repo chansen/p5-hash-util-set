@@ -31,6 +31,9 @@ Hash::Util::Set - Set operations on hash keys
    $bool = keys_any  %x, 'a', 'z';            # at least one exists?
    $bool = keys_all  %x, 'a', 'b', 'c';       # all exist?
    $bool = keys_none %x, 'x', 'y', 'z';       # none exist?
+   
+   # Combined Operations
+   @sets = keys_partition %x, %y;             # A \ B, A ∩ B, B \ A
 
 =head1 DESCRIPTION
 
@@ -132,6 +135,17 @@ True if all keys in LIST exist in C<%x>. Returns true for empty LIST.
    $bool = keys_none %x, LIST;
 
 True if none of the keys in LIST exist in C<%x>. Returns true for empty LIST.
+
+=head2 Combined Operations
+
+=head3 keys_partition
+
+    my ($only_x, $both, $only_y) = keys_partition %x, %y;
+
+Partitions keys into three disjoint sets: keys only in C<%x> (C<A \ B>), 
+keys in both hashes (C<A ∩ B>), and keys only in C<%y> (C<B \ A>).
+
+Returns a list with three array references.
 
 =head1 ALIASES
 

@@ -17,7 +17,8 @@ BEGIN {
                                     keys_proper_superset
                                     keys_any
                                     keys_all
-                                    keys_none ]);
+                                    keys_none
+                                    keys_partition ]);
 }
 
 sub TRUE    () { !!1 }
@@ -139,6 +140,30 @@ for (1..ROUNDS) {
       my $got = keys_symmetric_difference %x, %y;
       my $exp = vec_keys_count($exp_vec);
       is($got, $exp, 'symmetric difference - scalar context');
+    }
+  }
+
+  {
+    my $exp_vec_only_x = $vx & ~$vy;
+    my $exp_vec_both   = $vx & $vy;
+    my $exp_vec_only_y = $vy & ~$vx;
+
+    my ($got_only_x, $got_both, $got_only_y) = keys_partition %x, %y;
+
+    {
+      my $got = [ sort { $a <=> $b } @$got_only_x ];
+      my $exp = [ vec_keys($exp_vec_only_x) ];
+      is_deeply($got, $exp, 'keys_partition - only_x');
+    }
+    {
+      my $got = [ sort { $a <=> $b } @$got_both ];
+      my $exp = [ vec_keys($exp_vec_both) ];
+      is_deeply($got, $exp, 'keys_partition - both');
+    }
+    {
+      my $got = [ sort { $a <=> $b } @$got_only_y ];
+      my $exp = [ vec_keys($exp_vec_only_y) ];
+      is_deeply($got, $exp, 'keys_partition - only_y');
     }
   }
 

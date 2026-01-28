@@ -129,7 +129,7 @@ Christian Hansen <chansen@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2025 Christian Hansen
+Copyright (C) 2026 Christian Hansen
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

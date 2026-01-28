@@ -6,7 +6,7 @@ A collection of utilities for set operations and SQL-like joins on Perl hashes.
 
 ### Hash::Util::Set - Set Operations on Hash Keys
 
-Provides set operations on hash keys, treating hash keys as mathematical sets.
+Provides set operations on hash keys.
 
 **Set Operations:**
 - `keys_union` - Keys in either hash (A ∪ B)
@@ -58,27 +58,25 @@ Provides SQL-like join operations for combining two hashes based on their keys.
 
 **Example:**
 ```perl
-use Hash::Util::Join qw(:all);
-
-my %users  = (1 => 'Alice', 2 => 'Bob', 3 => 'Charlie');
-my %scores = (2 => 95, 3 => 87, 4 => 92);
+%users  = (1 => 'Alice', 2 => 'Bob', 3 => 'Charlie'        );
+%scores = (              2 => 95,    3 => 87,       4 => 92);
 
 # Inner join - only matching keys
-my %result = hash_inner_join %users, %scores, sub {
-    my ($key, $name, $score) = @_;
-    "$name: $score";
+%result = hash_inner_join %users, %scores, sub {
+  my ($key, $name, $score) = @_;
+  "$name: $score";
 };
 # Result: (2 => 'Bob: 95', 3 => 'Charlie: 87')
 
 # Left join - all users, with scores if available
-my %result = hash_left_join %users, %scores, sub {
-    my ($key, $name, $score) = @_;
-    defined($score) ? "$name: $score" : "$name: no score";
+%result = hash_left_join %users, %scores, sub {
+  my ($key, $name, $score) = @_;
+  defined $score ? "$name: $score" : "$name: no score";
 };
 # Result: (1 => 'Alice: no score', 2 => 'Bob: 95', 3 => 'Charlie: 87')
 
 # Anti join - users without scores
-my %result = hash_left_anti_join %users, %scores;
+%result = hash_left_anti_join %users, %scores;
 # Result: (1 => 'Alice')
 ```
 
@@ -106,13 +104,13 @@ Both modules automatically use XS implementations when available, falling back t
 Both modules support flexible importing:
 
 ```perl
-use Hash::Util::Set qw(:all);          # All functions
-use Hash::Util::Set qw(:operations);   # Set operations only
-use Hash::Util::Set qw(:predicates);   # Predicates only
-use Hash::Util::Set qw(:membership);   # Membership tests only
+use Hash::Util::Set qw(:all);             # All functions
+use Hash::Util::Set qw(:operations);      # Set operations only
+use Hash::Util::Set qw(:predicates);      # Predicates only
+use Hash::Util::Set qw(:membership);      # Membership tests only
 
-use Hash::Util::Join qw(:all);         # All join functions
-use Hash::Util::Join qw(hash_inner_join hash_left_join);  # Specific functions
+use Hash::Util::Join qw(:all);            # All join functions
+use Hash::Util::Join qw(hash_inner_join); # Specific functions
 ```
 
 ## See Also

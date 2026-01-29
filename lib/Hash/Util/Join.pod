@@ -277,6 +277,28 @@ Returns key-value pairs in list context, hash reference in scalar context.
     };
     # Result: (bob => {quarter => 'Q2', sales => 25000}, ...)
 
+=head1 TIPS
+
+=head2 Distinguishing undef values from missing keys
+
+In cases where it is necessary to distinguish undef values from 
+missing keys, the merge function can access the original hashes 
+via a closure to check key existence.
+
+    %x = (a => 1, b => undef);
+    %y = (a => 2, c => 3);
+
+    %result = hash_left_join %x, %y, sub {
+      my ($k, $left, $right) = @_;
+  
+      if (exists $y{$k}) {
+        return "from y: " . ($right // 'undef');
+      } else {
+        return "from x: " . ($left // 'undef');
+      }
+    };
+    # Result: (a => 'from y: 2', b => 'from x: undef')
+
 =head1 EXPORTS
 
 Nothing is exported by default. Import functions individually or use C<:all>:

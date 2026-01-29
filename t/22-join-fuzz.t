@@ -77,8 +77,14 @@ foreach my $round (1..ROUNDS) {
     {
       my $exp_vec  = $vx & $vy;
       my %exp      = map { $_ => $y{$_} } vec_keys($exp_vec);
-      my %got = hash_inner_join %x, %y;
-      is_deeply(\%got, \%exp, 'inner join');
+      {
+        my %got = hash_inner_join %x, %y;
+        is_deeply(\%got, \%exp, 'inner join - list context');
+      }
+      {
+        my $got = hash_inner_join %x, %y;
+        is_deeply($got, \%exp, 'inner join - scalar context');
+      }
     }
 
     # Left join
@@ -88,8 +94,14 @@ foreach my $round (1..ROUNDS) {
         $_ => exists $y{$_} ? $y{$_} : $x{$_}
       } vec_keys($exp_vec);
 
-      my %got = hash_left_join %x, %y;
-      is_deeply(\%got, \%exp, 'left join');
+      {
+        my %got = hash_left_join %x, %y;
+        is_deeply(\%got, \%exp, 'left join - list context');
+      }
+      {
+        my $got = hash_left_join %x, %y;
+        is_deeply($got, \%exp, 'left join - scalar context');
+      }
     }
 
     # Right join
@@ -99,8 +111,16 @@ foreach my $round (1..ROUNDS) {
         $_ => exists $x{$_} ? $x{$_} : $y{$_}
       } vec_keys($exp_vec);
 
-      my %got = hash_right_join %x, %y;
-      is_deeply(\%got, \%exp, 'rigth join');
+      {
+        my %got = hash_right_join %x, %y;
+        is_deeply(\%got, \%exp, 'rigth join - list context');
+
+      }
+      {
+        my $got = hash_right_join %x, %y;
+        is_deeply($got, \%exp, 'rigth join - scalar context');
+
+      }
     }
 
     # Outer join
@@ -110,8 +130,14 @@ foreach my $round (1..ROUNDS) {
         $_ => exists $y{$_} ? $y{$_} : $x{$_}
       } vec_keys($exp_vec);
 
-      my %got = hash_outer_join %x, %y;
-      is_deeply(\%got, \%exp, 'outer join');
+      {
+        my %got = hash_outer_join %x, %y;
+        is_deeply(\%got, \%exp, 'outer join - list context');
+      }
+      {
+        my $got = hash_outer_join %x, %y;
+        is_deeply($got, \%exp, 'outer join - scalar context');
+      }
     }
 
     # Left anti join
@@ -119,8 +145,14 @@ foreach my $round (1..ROUNDS) {
       my $exp_vec = $vx & ~$vy;
       my @exp_keys = vec_keys($exp_vec);
       my %exp = map { $_ => $x{$_} } @exp_keys;
-      my %got = hash_left_anti_join %x, %y;
-      is_deeply(\%got, \%exp, 'left anti join');
+      {
+        my %got = hash_left_anti_join %x, %y;
+        is_deeply(\%got, \%exp, 'left anti join - list context');
+      }
+      {
+        my $got = hash_left_anti_join %x, %y;
+        is_deeply($got, \%exp, 'left anti join - scalar context');
+      }
     }
 
     # Right anti join
@@ -128,8 +160,15 @@ foreach my $round (1..ROUNDS) {
       my $exp_vec = $vy & ~$vx;
       my @exp_keys = vec_keys($exp_vec);
       my %exp = map { $_ => $y{$_} } @exp_keys;
-      my %got = hash_right_anti_join %x, %y;
-      is_deeply(\%got, \%exp, 'right anti join');
+
+      {
+        my %got = hash_right_anti_join %x, %y;
+        is_deeply(\%got, \%exp, 'right anti join - list context');
+      }
+      {
+        my $got = hash_right_anti_join %x, %y;
+        is_deeply($got, \%exp, 'right anti join - scalar context');
+      }
     }
 
     # Full anti join
@@ -139,8 +178,15 @@ foreach my $round (1..ROUNDS) {
       my %exp = map {
         $_ => exists $x{$_} ? $x{$_} : $y{$_}
       } @exp_keys;
-      my %got = hash_full_anti_join %x, %y;
-      is_deeply(\%got, \%exp, 'full anti join');
+
+      {
+        my %got = hash_full_anti_join %x, %y;
+        is_deeply(\%got, \%exp, 'full anti join - list context');
+      }
+      {
+        my $got = hash_full_anti_join %x, %y;
+        is_deeply($got, \%exp, 'full anti join - scalar context');
+      }
     }
 
     # Test with custom merge function
@@ -150,8 +196,15 @@ foreach my $round (1..ROUNDS) {
       my %exp = map {
         $_ => $x{$_} + $y{$_}
       } @exp_keys;
-      my %got = hash_inner_join %x, %y, sub { $_[1] + $_[2] };
-      is_deeply(\%got, \%exp, 'custom merge');
+
+      {
+        my %got = hash_inner_join %x, %y, sub { $_[1] + $_[2] };
+        is_deeply(\%got, \%exp, 'custom merge - list context');
+      }
+      {
+        my $got = hash_inner_join %x, %y, sub { $_[1] + $_[2] };
+        is_deeply($got, \%exp, 'custom merge - scalar context');
+      }
     }
   };
 }

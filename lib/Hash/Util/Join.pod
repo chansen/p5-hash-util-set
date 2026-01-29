@@ -112,6 +112,7 @@ No merge function - values come from whichever hash contains the key.
 
 Returns key-value pairs in list context, hash reference in scalar context.
 
+      my ($key, $name, $score) = @_;
 =head1 EXPORTS
 
 Nothing is exported by default. Import functions individually or use C<:all>:

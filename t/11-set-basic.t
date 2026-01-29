@@ -431,8 +431,8 @@ subtest 'both hashes tied' => sub {
   tie my %x, 'MyTiedHash';
   tie my %y, 'MyTiedHash';
 
-  %x = (a => 1, b => 2);
-  %y = (b => 3, c => 4);
+  %x = (a => 1, b => 2       );
+  %y = (        b => 3, c => 4);
 
   my $got = [sort { $a cmp $b } keys_union %x, %y];
   is_deeply($got, [qw(a b c)], 'both tied: union');

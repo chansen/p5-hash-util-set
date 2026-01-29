@@ -96,8 +96,8 @@ sub vec_none {
   return TRUE;
 }
 
-for (1..ROUNDS) {
-  my $use_tied_hash = ($_ >= (ROUNDS - 100));
+foreach my $round (1..ROUNDS) {
+  my $use_tied_hash = ($round >= (ROUNDS - 100));
   my %x = rand_hash($use_tied_hash);
   my %y = rand_hash($use_tied_hash);
 
@@ -106,101 +106,115 @@ for (1..ROUNDS) {
 
   vec($vx, MAX_KEY - 1, 1) |= 0;
   vec($vy, MAX_KEY - 1, 1) |= 0;
-
-  {
-    my $exp_vec = $vx | $vy;
-    {
-      my $got = [ sort { $a <=> $b } keys_union %x, %y ];
-      my $exp = [ vec_keys($exp_vec) ];
-      is_deeply($got, $exp, 'union - list context');
-    }
-    {
-      my $got = keys_union %x, %y;
-      my $exp = vec_keys_count($exp_vec);
-      is($got, $exp, 'union - scalar context');
-    }
-  }
-
-  {
-    my $exp_vec = $vx & $vy;
-    {
-      my $got = [ sort { $a <=> $b } keys_intersection %x, %y ];
-      my $exp = [ vec_keys($exp_vec) ];
-      is_deeply($got, $exp, 'intersection - list context');
-    }
-    {
-      my $got = keys_intersection %x, %y;
-      my $exp = vec_keys_count($exp_vec);
-      is($got, $exp, 'intersection - scalar context');
-    }
-  }
-
-  {
-    my $exp_vec = $vx & ~$vy;
-    {
-      my $got = [ sort { $a <=> $b } keys_difference %x, %y ];
-      my $exp = [ vec_keys($exp_vec) ];
-      is_deeply($got, $exp, 'difference - list context');
-    }
-    {
-      my $got = keys_difference %x, %y;
-      my $exp = vec_keys_count($exp_vec);
-      is($got, $exp, 'difference - scalar context');
-    }
-  }
-
-  {
-    my $exp_vec = $vx ^ $vy;
-    {
-      my $got = [ sort { $a <=> $b } keys_symmetric_difference %x, %y ];
-      my $exp = [ vec_keys($exp_vec) ];
-      is_deeply($got, $exp, 'symmetric difference - list context');
-    }
-    {
-      my $got = keys_symmetric_difference %x, %y;
-      my $exp = vec_keys_count($exp_vec);
-      is($got, $exp, 'symmetric difference - scalar context');
-    }
-  }
   
-  {
-    my $exp_vec_only_x = $vx & ~$vy;
-    my $exp_vec_both   = $vx & $vy;
-    my $exp_vec_only_y = $vy & ~$vx;
+  my $subtest = sprintf 'round:%d hash:%s x=%d y=%d',
+    $round, ($use_tied_hash ? 'tied' : 'plain'), , scalar keys %x, scalar keys %y;
 
-    my ($got_only_x, $got_both, $got_only_y) = keys_partition %x, %y;
+  subtest $subtest => sub {
+    {
+      my $exp_vec = $vx | $vy;
+      {
+        my $got = [ sort { $a <=> $b } keys_union %x, %y ];
+        my $exp = [ vec_keys($exp_vec) ];
+        is_deeply($got, $exp, 'union - list context');
+      }
+      {
+        my $got = keys_union %x, %y;
+        my $exp = vec_keys_count($exp_vec);
+        is($got, $exp, 'union - scalar context');
+      }
+    }
 
     {
-      my $got = [ sort { $a <=> $b } @$got_only_x ];
-      my $exp = [ vec_keys($exp_vec_only_x) ];
-      is_deeply($got, $exp, 'keys_partition - only_x');
+      my $exp_vec = $vx & $vy;
+      {
+        my $got = [ sort { $a <=> $b } keys_intersection %x, %y ];
+        my $exp = [ vec_keys($exp_vec) ];
+        is_deeply($got, $exp, 'intersection - list context');
+      }
+      {
+        my $got = keys_intersection %x, %y;
+        my $exp = vec_keys_count($exp_vec);
+        is($got, $exp, 'intersection - scalar context');
+      }
     }
+
     {
-      my $got = [ sort { $a <=> $b } @$got_both ];
-      my $exp = [ vec_keys($exp_vec_both) ];
-      is_deeply($got, $exp, 'keys_partition - both');
+      my $exp_vec = $vx & ~$vy;
+      {
+        my $got = [ sort { $a <=> $b } keys_difference %x, %y ];
+        my $exp = [ vec_keys($exp_vec) ];
+        is_deeply($got, $exp, 'difference - list context');
+      }
+      {
+        my $got = keys_difference %x, %y;
+        my $exp = vec_keys_count($exp_vec);
+        is($got, $exp, 'difference - scalar context');
+      }
     }
+
     {
-      my $got = [ sort { $a <=> $b } @$got_only_y ];
-      my $exp = [ vec_keys($exp_vec_only_y) ];
-      is_deeply($got, $exp, 'keys_partition - only_y');
+      my $exp_vec = $vx ^ $vy;
+      {
+        my $got = [ sort { $a <=> $b } keys_symmetric_difference %x, %y ];
+        my $exp = [ vec_keys($exp_vec) ];
+        is_deeply($got, $exp, 'symmetric difference - list context');
+      }
+      {
+        my $got = keys_symmetric_difference %x, %y;
+        my $exp = vec_keys_count($exp_vec);
+        is($got, $exp, 'symmetric difference - scalar context');
+      }
     }
-  }
+  
+    {
+      my $exp_vec_only_x = $vx & ~$vy;
+      my $exp_vec_both   = $vx & $vy;
+      my $exp_vec_only_y = $vy & ~$vx;
 
-  is(keys_disjoint(%x, %y), !($vx & $vy), 'disjoint');
-  is(keys_equal(%x, %y), ($vx eq $vy), 'equal' );
-  is(keys_subset(%x, %y), !($vx & ~$vy), 'subset');
-  is(keys_proper_subset(%x, %y), (!($vx & ~$vy) && $vx ne $vy), 'proper subset');
-  is(keys_superset(%x, %y), !($vy & ~$vx), 'superset');
-  is(keys_proper_superset(%x, %y), (!($vy & ~$vx) && $vx ne $vy), 'proper superset');
+      my ($got_only_x, $got_both, $got_only_y) = keys_partition %x, %y;
 
-  {
-    my @k = map { int rand MAX_KEY } 0..int rand 10;
+      {
+        my $got = [ sort { $a <=> $b } @$got_only_x ];
+        my $exp = [ vec_keys($exp_vec_only_x) ];
+        is_deeply($got, $exp, 'keys_partition - only_x');
+      }
+      {
+        my $got = [ sort { $a <=> $b } @$got_both ];
+        my $exp = [ vec_keys($exp_vec_both) ];
+        is_deeply($got, $exp, 'keys_partition - both');
+      }
+      {
+        my $got = [ sort { $a <=> $b } @$got_only_y ];
+        my $exp = [ vec_keys($exp_vec_only_y) ];
+        is_deeply($got, $exp, 'keys_partition - only_y');
+      }
+    }
 
-    is(keys_any(%x, @k), vec_any($vx, @k), 'keys_any');
-    is(keys_all(%x, @k), vec_all($vx, @k), 'keys_all');
-    is(keys_none(%x, @k), vec_none($vx, @k), 'keys_none');
-  }
+    {
+      my $disjoint        = !($vx & $vy);
+      my $equal           = $vx eq $vy;
+      my $subset          = !($vx & ~$vy);
+      my $proper_subset   = !($vx & ~$vy) && $vx ne $vy;
+      my $superset        = !($vy & ~$vx);
+      my $proper_superset = !($vy & ~$vx) && $vx ne $vy;
+    
+      is(keys_disjoint(%x, %y), $disjoint, 'disjoint');
+      is(keys_equal(%x, %y), $equal, 'equal' );
+      is(keys_subset(%x, %y), $subset, 'subset');
+      is(keys_proper_subset(%x, %y), $proper_subset, 'proper subset');
+      is(keys_superset(%x, %y), $superset, 'superset');
+      is(keys_proper_superset(%x, %y), $proper_superset, 'proper superset');
+    }
+
+    {
+      my @k = map { int rand MAX_KEY } 0..int rand 10;
+
+      is(keys_any(%x, @k), vec_any($vx, @k), 'keys_any');
+      is(keys_all(%x, @k), vec_all($vx, @k), 'keys_all');
+      is(keys_none(%x, @k), vec_none($vx, @k), 'keys_none');
+    }
+  };
 }
 
 done_testing;

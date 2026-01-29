@@ -21,6 +21,19 @@ BEGIN {
                                     keys_partition ]);
 }
 
+{
+  package MyTiedHash;
+  sub TIEHASH  { bless {}, shift }
+  sub SCALAR   { scalar %{$_[0]} }
+  sub STORE    { $_[0]{$_[1]} = $_[2] }
+  sub FETCH    { $_[0]{$_[1]} }
+  sub EXISTS   { exists $_[0]{$_[1]} }
+  sub DELETE   { delete $_[0]{$_[1]} }
+  sub CLEAR    { %{$_[0]} = () }
+  sub FIRSTKEY { my $a = scalar keys %{$_[0]}; each %{$_[0]} }
+  sub NEXTKEY  { each %{$_[0]} }
+}
+
 sub TRUE    () { !!1 }
 sub FALSE   () { !!0 }
 
@@ -28,7 +41,13 @@ sub MAX_KEY () {   64 }
 sub ROUNDS  () { 1000 }
 
 sub rand_hash {
+  my ($use_tied_hash) = @_;
+
   my %h;
+  if ($use_tied_hash) {
+    tie %h, 'MyTiedHash';
+  }
+
   for my $k (0..MAX_KEY - 1) {
     $h{$k} = 1 if rand() < 0.5;
   }
@@ -78,8 +97,9 @@ sub vec_none {
 }
 
 for (1..ROUNDS) {
-  my %x = rand_hash();
-  my %y = rand_hash();
+  my $use_tied_hash = ($_ >= (ROUNDS - 100));
+  my %x = rand_hash($use_tied_hash);
+  my %y = rand_hash($use_tied_hash);
 
   my $vx = hash_to_vec(\%x);
   my $vy = hash_to_vec(\%y);
@@ -142,7 +162,7 @@ for (1..ROUNDS) {
       is($got, $exp, 'symmetric difference - scalar context');
     }
   }
-
+  
   {
     my $exp_vec_only_x = $vx & ~$vy;
     my $exp_vec_both   = $vx & $vy;

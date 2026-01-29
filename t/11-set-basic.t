@@ -407,7 +407,7 @@ subtest 'large hashes' => sub {
 
 subtest 'tied hash' => sub {
   my (%x, %y);
-  
+
   tie %x, 'MyTiedHash';
   %x = (a => 1, b => 2, c => 3        );
   %y = (b => 4,         c => 5, d => 6);
@@ -439,9 +439,25 @@ subtest 'both hashes tied' => sub {
   ok(keys_equal(%x, %x), 'both tied: equal to itself');
 };
 
+subtest 'large hashes tied' => sub {
+  tie my %x, 'MyTiedHash';
+  tie my %y, 'MyTiedHash';
+
+  %x = map { $_ => $_ * 2 } 1..1000;
+  %y = map { $_ => $_ * 3 } 500..1500;
+
+  my @intersection = keys_intersection %x, %y;
+  is(scalar @intersection, 501, 'intersection: large hashes tied');
+
+  my @union = keys_union %x, %y;
+  is(scalar @union, 1500, 'union: large hashes tied');
+
+  ok(!keys_disjoint(%x, %y), 'large hashes tied: not disjoint');
+};
+
 subtest 'undef values' => sub {
-  my %x = (a => undef, b => 2, c => undef);
-  my %y = (b => undef, c => 3, d => undef);
+  my %x = (a => undef, b => 2,     c => undef           );
+  my %y = (            b => undef, c => 3,    d => undef);
 
   my $got = [sort { $a cmp $b } keys_intersection %x, %y];
   is_deeply($got, [qw(b c)], 'undef values: intersection');
@@ -450,7 +466,7 @@ subtest 'undef values' => sub {
 };
 
 subtest 'zero and empty string values' => sub {
-  my %x = (a => 0, b => '', c => undef);
+  my %x = (a => 0, b => '',  c => undef);
   my %y = (a => 1, b => 'x', c => 3);
 
   my $got = [sort { $a cmp $b } keys_intersection %x, %y];

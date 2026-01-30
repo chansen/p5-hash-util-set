@@ -120,7 +120,7 @@ Returns key-value pairs in list context, hash reference in scalar context.
     # Inner join - users with scores
     %result = hash_inner_join %users, %scores, sub {
       my ($id, $name, $score) = @_;
-      { name => $name, score => $score };
+      return { name => $name, score => $score };
     };
     # Result:  
     #   (2 => {name => 'Bob',     score => 95}, 
@@ -129,7 +129,7 @@ Returns key-value pairs in list context, hash reference in scalar context.
     # Left join - all users, with scores if available
     %result = hash_left_join %users, %scores, sub {
       my ($key, $name, $score) = @_;
-      defined $score ? "$name: $score" : "$name: no score";
+      return defined $score ? "$name: $score" : "$name: no score";
     };
     # Result: 
     #   (1 => 'Alice: no score', 
@@ -140,41 +140,6 @@ Returns key-value pairs in list context, hash reference in scalar context.
     %result = hash_left_anti_join %users, %scores;
     # Result: 
     #   (1 => 'Alice')
-
-=head2 Chaining Joins
-
-    %products = (
-      1 => 'Widget',
-      2 => 'Gadget',
-      3 => 'Gizmo',
-    );
-    
-    %prices = (
-      2 => 19.99,
-      3 => 29.99,
-      4 => 39.99,
-    );
-    
-    %stock = (
-      2 => 50,
-      3 => 0,
-    );
-    
-    # Find products with both price and stock
-    %with_price = hash_inner_join %products, %prices, sub {
-      { name => $_[1], price => $_[2] }
-    };
-    
-    # Find available products
-    %available = hash_inner_join %with_price, %stock, sub {
-      my ($id, $info, $qty) = @_;
-      { %$info, stock => $qty };
-    };
-    # Result: (2 => {name => 'Gadget', price => 19.99, stock => 50})
-    
-    # Or find what's missing at each step
-    %no_price = hash_left_anti_join %products, %prices;  # (1 => 'Widget')
-    %no_stock = hash_left_anti_join %with_price, %stock; # (3 => {...})
 
 
 =head2 Merging Nested Structures
@@ -234,14 +199,40 @@ Returns key-value pairs in list context, hash reference in scalar context.
     %config = hash_outer_join %system_defaults, %user_config, \&deep_merge;
     # Result:
     #   database => {
-    #     host => 'prod.example.com',       # overridden
-    #     port => 5432,                     # from defaults
-    #     pool => { min => 10, max => 20 }  # deeply merged
+    #     host => 'prod.example.com',
+    #     port => 5432,
+    #     pool => { min => 10, max => 20 }
     #   }
     #   logging => {
-    #     level => 'info',                                        # from defaults
-    #     output => { file => '/var/log/app.log', console => 0 }  # deeply merged
+    #     level => 'info',
+    #     output => { file => '/var/log/app.log', console => 0 }
     #   }
+
+=head2 Chaining Joins
+
+    %products = (1 => 'Widget', 2 => 'Gadget', 3 => 'Gizmo'             );
+    %prices   = (               2 => 19.99,    3 => 29.99,    4 => 39.99);
+    %stock    = (1 => 10,       2 => 50                                 );
+    
+    # Find products with price
+    %catalog = hash_inner_join %products, %prices, sub {
+      return { name => $_[1], price => $_[2] }
+    };
+    # Result: 
+    #   (2 => { name => 'Gadget', price => 19.99 },
+    #    3 => { name => "Gizmo",  price => 29.99 })
+
+    # Find available products with price in stock
+    %available = hash_inner_join %catalog, %stock, sub {
+      my ($id, $info, $qty) = @_;
+      return { %$info, stock => $qty };
+    };
+    # Result: 
+    #   (2 => { name => 'Gadget', price => 19.99, stock => 50 })
+    
+    # Or find what's missing at each step
+    %no_price = hash_left_anti_join %products, %prices;  # (1 => 'Widget')
+    %no_stock = hash_left_anti_join %catalog, %stock;    # (3 => {...})
 
 =head2 Numeric Operations
 
@@ -259,29 +250,56 @@ Returns key-value pairs in list context, hash reference in scalar context.
     
     # Total sales for employees in both quarters
     %both_quarters = hash_inner_join %q1_sales, %q2_sales, sub {
-      $_[1] + $_[2]
+      return $_[1] + $_[2]
     };
     # Result: (bob => 47000, carol => 37000)
     
     # All employee totals
     %all_totals = hash_outer_join %q1_sales, %q2_sales, sub {
-      ($_[1] // 0) + ($_[2] // 0)
+      return ($_[1] // 0) + ($_[2] // 0)
     };
     # Result: (alice => 15000, bob => 47000, carol => 37000, dave => 21000)
     
     # Best performance per employee
     %best_quarter = hash_inner_join %q1_sales, %q2_sales, sub {
       my ($name, $q1, $q2) = @_;
-      $q1 > $q2 ? { quarter => 'Q1', sales => $q1 }
-                : { quarter => 'Q2', sales => $q2 };
+      return $q1 > $q2 ? { quarter => 'Q1', sales => $q1 }
+                       : { quarter => 'Q2', sales => $q2 };
     };
     # Result: (bob => {quarter => 'Q2', sales => 25000}, ...)
 
 =head1 TIPS
 
+=head2 Always Use C<return> or C<+> in Merge Functions
+
+Perl cannot distinguish between a block and a hash reference constructor
+when it appears at the end of a subroutine. Always use C<return> or prefix
+with C<+> to avoid ambiguity.
+
+B<Incorrect:>
+
+    %result = hash_inner_join %x, %y, sub {
+      my ($k, $left, $right) = @_;
+      { %$left, %$right }  # ERROR: This is a BLOCK, not a hashref!
+    };
+
+B<Correct - using return:>
+
+    %result = hash_inner_join %x, %y, sub {
+      my ($k, $left, $right) = @_;
+      return { %$left, %$right };  # Explicit return
+    };
+
+B<Correct - using unary plus:>
+
+    %result = hash_inner_join %x, %y, sub {
+      my ($k, $left, $right) = @_;
+      +{ %$left, %$right }  # Unary + forces hashref context
+    };
+
 =head2 Distinguishing undef values from missing keys
 
-In cases where it is necessary to distinguish undef values from 
+In cases where it is necessary to distinguish C<undef> values from 
 missing keys, the merge function can access the original hashes 
 via a closure to check key existence.
 
@@ -298,6 +316,36 @@ via a closure to check key existence.
       }
     };
     # Result: (a => 'from y: 2', b => 'from x: undef')
+
+=head2 Modifying Input Hashes During Merge
+
+All join functions retrieve their operation keys before invoking merge 
+functions. This means it is safe to modify either input hash during the 
+merge function execution without affecting the join operation itself.
+
+    %x = (a => 1,  b => 2, c => 3);
+    %y = (a => 10, b => 20);
+    
+    %result = hash_inner_join %x, %y, sub {
+      my ($k, $left, $right) = @_;
+      
+      # Safe: Add new keys to input hashes
+      $x{new_key} = 99;
+      delete $y{b};
+      
+      # Safe: Modify existing values
+      $x{c} = 999;
+      
+      return $left + $right;
+    };
+    
+    # Result: (a => 11, b => 22)
+
+The key list is determined before iteration begins, so modifications
+to C<%x> or C<%y> during the merge function don't affect which keys
+are processed.
+
+This guarantee holds for both the Pure Perl (PP) and XS implementations.
 
 =head1 EXPORTS
 

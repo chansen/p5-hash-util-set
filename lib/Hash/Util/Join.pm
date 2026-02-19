@@ -5,7 +5,7 @@ use warnings;
 use Exporter qw[import];
 
 BEGIN {
-  our $VERSION   = '0.06';
+  our $VERSION   = '0.07';
   our @EXPORT_OK = qw[ hash_inner_join
                        hash_left_join
                        hash_right_join

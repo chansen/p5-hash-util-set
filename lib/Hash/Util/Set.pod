@@ -8,8 +8,6 @@ Hash::Util::Set - Set operations on hash keys
 
 =head1 SYNOPSIS
 
-   use Hash::Util::Set qw(:all);
-   
    %x = (a => 1, b => 2, c => 3);
    %y = (b => 4, c => 5, d => 6);
    

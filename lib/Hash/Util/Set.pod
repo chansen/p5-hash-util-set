@@ -43,9 +43,6 @@ intersection, difference), set predicates, and membership tests.
 
 All operations work only on keys; values are ignored.
 
-This module automatically uses the XS implementation if available, 
-falling back to pure Perl otherwise. 
-
 =head1 FUNCTIONS
 
 =head2 Set Operations
@@ -198,8 +195,8 @@ Short aliases: C<keys_or>, C<keys_and>, C<keys_sub>, C<keys_xor>.
 
 =head1 IMPLEMENTATION
 
-Automatically uses L<Hash::Util::Set::XS> if available, otherwise falls back to
-C<Hash::Util::Set::PP>.
+This module automatically uses the XS implementation L<Hash::Util::Set::XS> 
+if available, otherwise falls back to C<Hash::Util::Set::PP>.
 
 =head1 SEE ALSO
 

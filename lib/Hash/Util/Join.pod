@@ -129,7 +129,8 @@ Returns key-value pairs in list context, hash reference in scalar context.
     # Left join - all users, with scores if available
     %result = hash_left_join %users, %scores, sub {
       my ($key, $name, $score) = @_;
-      return defined $score ? "$name: $score" : "$name: no score";
+      return "$name: $score"    if defined $score;
+      return "$name: no score";
     };
     # Result: 
     #   (1 => 'Alice: no score', 
@@ -197,15 +198,22 @@ Returns key-value pairs in list context, hash reference in scalar context.
     );
     
     %config = hash_outer_join %system_defaults, %user_config, \&deep_merge;
+    
     # Result:
     #   database => {
-    #     host => 'prod.example.com',
-    #     port => 5432,
-    #     pool => { min => 10, max => 20 }
+    #     host => 'prod.example.com',      # overridden
+    #     port => 5432,                    # from defaults
+    #     pool => {
+    #       min => 10,                     # deeply merged and overridden
+    #       max => 20,                     # deeply merged from defaults
+    #     }
     #   }
     #   logging => {
-    #     level => 'info',
-    #     output => { file => '/var/log/app.log', console => 0 }
+    #     level => 'info',                  # from defaults
+    #     output => { 
+    #       file    => '/var/log/app.log',  # deeply merged from defaults
+    #       console => 0,                   # deeply merged and overridden
+    #     }
     #   }
 
 =head2 Chaining Joins
@@ -236,17 +244,8 @@ Returns key-value pairs in list context, hash reference in scalar context.
 
 =head2 Numeric Operations
 
-    %q1_sales = (
-      alice => 15000,
-      bob   => 22000,
-      carol => 18000,
-    );
-    
-    %q2_sales = (
-      bob   => 25000,
-      carol => 19000,
-      dave  => 21000,
-    );
+    %q1_sales = (alice => 15000, bob => 22000, carol => 18000                );
+    %q2_sales = (                bob => 25000, carol => 19000, dave  => 21000);
     
     # Total sales for employees in both quarters
     %both_quarters = hash_inner_join %q1_sales, %q2_sales, sub {
@@ -280,24 +279,24 @@ B<Incorrect:>
 
     %result = hash_inner_join %x, %y, sub {
       my ($k, $left, $right) = @_;
-      { %$left, %$right }  # ERROR: This is a BLOCK, not a hashref!
+      { %$left, %$right }          # This is a BLOCK, not a hashref!
     };
 
 B<Correct - using return:>
 
     %result = hash_inner_join %x, %y, sub {
       my ($k, $left, $right) = @_;
-      return { %$left, %$right };  # Explicit return
+      return { %$left, %$right };   # Explicit return
     };
 
 B<Correct - using unary plus:>
 
     %result = hash_inner_join %x, %y, sub {
       my ($k, $left, $right) = @_;
-      +{ %$left, %$right }  # Unary + forces hashref context
+      +{ %$left, %$right }          # Unary + forces hashref context
     };
 
-=head2 Distinguishing undef values from missing keys
+=head2 Distinguishing C<undef> values from missing keys
 
 In cases where it is necessary to distinguish C<undef> values from 
 missing keys, the merge function can access the original hashes 

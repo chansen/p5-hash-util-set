@@ -12,9 +12,22 @@ BEGIN {
                        hash_outer_join
                        hash_left_anti_join
                        hash_right_anti_join
-                       hash_full_anti_join ];
+                       hash_full_anti_join 
+                       hash_partition
+                       hash_partition_by ];
 
-  our %EXPORT_TAGS = (all => \@EXPORT_OK);
+  our %EXPORT_TAGS = (
+    all       => \@EXPORT_OK,
+    joins     => [qw[ hash_inner_join
+                      hash_left_join
+                      hash_right_join
+                      hash_outer_join
+                      hash_left_anti_join
+                      hash_right_anti_join
+                      hash_full_anti_join ]],
+    partition => [qw[ hash_partition
+                      hash_partition_by ]],
+  );
 
   my $use_pp = $ENV{HASH_UTIL_JOIN_PP};
   if (!$use_pp) {

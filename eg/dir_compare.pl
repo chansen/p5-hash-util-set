@@ -9,7 +9,7 @@ use File::Spec      qw[];
 use Hash::Util::Set qw[ keys_difference 
                         keys_intersection ];
 
-sub scan_dir {
+sub scan_directory {
   my ($dir) = @_;
 
   my %files;
@@ -25,8 +25,8 @@ sub scan_dir {
 die "Usage: $0 <dir1> <dir2>\n" unless @ARGV == 2;
 
 my ($dir_lhs, $dir_rhs) = @ARGV;
-my %files_lhs = scan_dir($dir_lhs);
-my %files_rhs = scan_dir($dir_rhs);
+my %files_lhs = scan_directory($dir_lhs);
+my %files_rhs = scan_directory($dir_rhs);
 
 my @different = grep {
   $files_lhs{$_} != $files_rhs{$_}
@@ -35,10 +35,10 @@ my @different = grep {
 my @only_lhs = keys_difference %files_lhs, %files_rhs;
 my @only_rhs = keys_difference %files_rhs, %files_lhs;
 
-say "\nOnly in $dir_lhs: ", scalar @only_lhs;
+say "\nOnly in '$dir_lhs': ", scalar @only_lhs;
 say "  $_" for sort @only_lhs;
 
-say "\nOnly in $dir_rhs: ", scalar @only_rhs;
+say "\nOnly in '$dir_rhs': ", scalar @only_rhs;
 say "  $_" for sort @only_rhs;
 
 say "\nDifferent sizes: ", scalar @different;

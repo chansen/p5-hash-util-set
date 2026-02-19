@@ -4,7 +4,7 @@
 
 =head1 NAME
 
-Hash::Util::Join - SQL-like join operations on hashes
+Hash::Util::Join - SQL-inspired operations for hash manipulation
 
 =head1 SYNOPSIS
 
